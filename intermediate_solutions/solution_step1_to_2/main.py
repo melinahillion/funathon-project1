@@ -1,82 +1,99 @@
-# %%
-# ============================================
-# STEP 1 — Generate synthetic regression data
-# ============================================
 
-import numpy as np
-import pandas as pd
-
-from sklearn.datasets import make_regression
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, r2_score
-
-# Reproducibility
-RANDOM_STATE = 20230516
-np.random.seed(RANDOM_STATE)
-
-# Generate numeric regression data
-X_num, y = make_regression(
-    n_samples=2000,
-    n_features=5,
-    noise=10.0,
-    random_state=RANDOM_STATE
-)
-
-# Create a DataFrame
-df = pd.DataFrame(X_num, columns=[f"num_{i}" for i in range(X_num.shape[1])])
-
-# Add a categorical feature
-df["category"] = np.random.choice(["A", "B", "C"], size=len(df))
-
-# Add target
-df["target"] = y
-
-
-# %%
-# ============================================
-# STEP 2 — Preprocessing
-#   - Outlier removal
-#   - Scaling
-#   - One-hot encoding
-# ============================================
-
-# Simple outlier removal using IQR on numeric columns
-numeric_cols = [col for col in df.columns if col.startswith("num_")]
-
-Q1 = df[numeric_cols].quantile(0.25)
-Q3 = df[numeric_cols].quantile(0.75)
-IQR = Q3 - Q1
-
-mask = ~((df[numeric_cols] < (Q1 - 1.5 * IQR)) |
-         (df[numeric_cols] > (Q3 + 1.5 * IQR))).any(axis=1)
-
-df = df.loc[mask].reset_index(drop=True)
-
-# Split features / target
-X = df.drop(columns="target")
-y = df["target"]
-
-# Column types
-categorical_cols = ["category"]
-
-# Preprocessing pipeline
-preprocessor = ColumnTransformer(
-    transformers=[
-        ("num", StandardScaler(), numeric_cols),
-        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_cols),
-    ]
-)
-
-
-# %%
 # ============================================
 # STEP 3 — Train / test split, model fitting,
 #          and performance evaluation
 # ============================================
 
 # YOUR CODE HERE
+# %%
+import polars as pl
+import plotnine as p9
+from datetime import datetime, timedelta
+
+pl.Config.set_tbl_cols(-1)  # show all columns
+pl.Config.set_tbl_rows(50)  # show 20 rows
+# %%
+data = pl.read_parquet('s3://confpns/synthetic-transactions/rawdata/transactions_flats_final.parquet')
+data
+# %%
+(
+    p9.ggplot(data.filter(pl.col("ccodep")=="14", pl.col("anneemut")==2023).select(["x", "y"])) +
+    p9.aes("x","y")+
+    p9.geom_point()
+)
+# %%
+# 1 ligne par vente ? 
+# où est adresse ? x,y sont identique par commune
+# dcntsol ?
+
+# 50218
+# 48.838630, -1.598313
+
+# %%
+def analyse_colonnes(df: pl.DataFrame) -> pl.DataFrame:
+    """
+    Retourne un DataFrame avec pour chaque colonne :
+    - Nom, type, statistiques de valeurs (nulles, NaN, manquantes, valides)
+    - Médiane (numérique), mode (string), date moyenne (date)
+    - Min, max
+    """
+    resultats = []
+
+    for col in df.columns:
+        serie = df[col]
+        n_total = len(serie)
+        n_null = serie.null_count()
+
+        # Calcul des NaN (spécifique aux float)
+        n_nan = 0
+        if serie.dtype in (pl.Float32, pl.Float64):
+            n_nan = serie.is_nan().sum()
+        n_valid = n_total - n_null - n_nan
+
+        # Calcul de la médiane, mode, min, max, ou date moyenne
+        if serie.dtype in (pl.Int8, pl.Int16, pl.Int32, pl.Int64, pl.Float32, pl.Float64):
+            mediane = serie.median()
+            val_min = serie.min()
+            val_max = serie.max()
+        elif serie.dtype == pl.Date:
+            mediane = serie.median()
+            val_min = serie.min()
+            val_max = serie.max()
+            # Calcul de la date moyenne
+            dates = serie.drop_nulls().to_list()
+            if dates:
+                avg_date = sum((d - datetime.min.date()).days for d in dates) / len(dates)
+                mediane = datetime.min.date() + timedelta(days=avg_date)
+            else:
+                mediane = None
+        else:  # Strings, booléens, etc.
+            mediane = serie.mode().first()
+            val_min = serie.min()
+            val_max = serie.max()
+
+        # Conversion de la médiane/mode en string
+        # mediane_str = str(mediane) if mediane is not None else "None"
+
+        resultats.append({
+            "colonne": col,
+            "type": str(serie.dtype),
+            "total": n_total,
+            "nulles": n_null,
+            "NaN": n_nan,
+            "valides": n_valid,
+            "médiane/mode": str(mediane),
+            "min": str(val_min),
+            "max": str(val_max)
+        })
+
+    return pl.DataFrame(resultats)
+
+
+#%%
+descr_df = analyse_colonnes(data)
+#%%
+print(descr_df)
+# print(descr_df.to_pandas().to_markdown(index=False))
+
+# %%
 
