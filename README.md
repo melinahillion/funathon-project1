@@ -116,3 +116,4 @@ Quasiment que des 0 pour les flat cf. stat_des_details_surf_flat_num et stat_des
 "dcntsol",
 "dcntnat",
 "dcntagri"
+with plot of repartition for various var stat_des_details_surf_flat_num

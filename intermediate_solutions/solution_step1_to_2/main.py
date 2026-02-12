@@ -96,27 +96,48 @@ def analyse_colonnes(df: pl.DataFrame) -> pl.DataFrame:
 
         # Calcul de la médiane, mode, min, max, ou date moyenne
         if serie.dtype in (pl.Int8, pl.Int16, pl.Int32, pl.Int64, pl.Float32, pl.Float64):
-            median = serie.median()
-            val_min = serie.min()
-            val_max = serie.max()
+            median = f'{serie.median():.2f}'
+            val_min = f'{serie.min():.2f}'
+            val_max = f'{serie.max():.2f}'
+            val_001 = f'{serie.quantile(0.001):.2f}'
+            val_01 = f'{serie.quantile(0.01):.2f}'
+            val_05 = f'{serie.quantile(0.05):.2f}'
+            val_25 = f'{serie.quantile(0.25):.2f}'
+            val_75 = f'{serie.quantile(0.75):.2f}'
+            val_95 = f'{serie.quantile(0.95):.2f}'
+            val_99 = f'{serie.quantile(0.99):.2f}'
+            val_999 = f'{serie.quantile(0.999):.2f}'
         elif serie.dtype == pl.Date:
             median = serie.median()
             val_min = serie.min()
             val_max = serie.max()
+            val_001 = "."
+            val_01 = "."
+            val_05 = "."
+            val_25 = "."
+            val_75 = "."
+            val_95 = "."
+            val_99 = "."
+            val_999 = "."
             # Calcul de la date moyenne
             dates = serie.drop_nulls().to_list()
             if dates:
                 avg_date = sum((d - datetime.min.date()).days for d in dates) / len(dates)
                 median = datetime.min.date() + timedelta(days=avg_date)
             else:
-                median = None
+                median = "."
         else:  # Strings, booléens, etc.
             median = serie.mode().first()
             val_min = serie.min()
             val_max = serie.max()
-
-        # Conversion de la médiane/mode en string
-        # mediane_str = str(mediane) if mediane is not None else "None"
+            val_001 = "."
+            val_01 = "."
+            val_05 = "."
+            val_25 = "."
+            val_75 = "."
+            val_95 = "."
+            val_99 = "."
+            val_999 = "."
 
         resultats.append({
             "colonne": col,
@@ -125,8 +146,16 @@ def analyse_colonnes(df: pl.DataFrame) -> pl.DataFrame:
             "nulls": n_null,
             "NaN": n_nan,
             "valid": n_valid,
-            "median/mode": str(median),
             "min": str(val_min),
+            "0.1%": val_001, 
+            "1%": val_01, 
+            "5%": val_05, 
+            "25%": val_25, 
+            "median/mode": str(median),
+            "75%": val_75, 
+            "95%": val_95, 
+            "99%": val_99, 
+            "99.9%": val_999, 
             "max": str(val_max)
         })
 
@@ -141,6 +170,81 @@ print(descr_df)
 
 # %%
 # print(descr_df.to_pandas().to_markdown(index=False))
+
+# %%
+#| label: stat_des_plot
+# Reshape the data for plotting
+descr_df_long = (
+    descr_df
+    .filter(
+        pl.col("type") != "String",
+        pl.col("type") != "Date", 
+        pl.col("max").str.len_chars() <= 5  # keeping only var with max <100
+    )
+    .unpivot(
+    index='colonne',
+    on=['min', '1%','5%', '25%', 'median/mode', '75%', '95%', '99%', 'max'],
+    variable_name='statistic',
+    value_name='value'
+    )
+    .cast({"value":pl.Float32})
+    .filter(
+        pl.col("colonne") != "x",
+        pl.col("colonne") != "y",
+        pl.col("colonne") != "idnatmut",
+        pl.col("colonne") != "moismut"
+    )
+)
+# %%
+#| label: stat_des_plot
+# Create the plot
+(
+    p9.ggplot(p9.aes(colour="statistic")) +
+    p9.geom_point(
+        descr_df_long.filter(pl.col('statistic') == 'min'),
+        p9.aes(x='colonne', y='value')
+    ) +
+    p9.geom_point(
+        descr_df_long.filter(pl.col('statistic') == '1%'),
+        p9.aes(x='colonne', y='value')
+    ) +    
+    p9.geom_point(
+        descr_df_long.filter(pl.col('statistic') == '5%'),
+        p9.aes(x='colonne', y='value')
+    ) +    
+    p9.geom_segment(
+        descr_df_long.filter(pl.col('statistic') == '25%'),
+        p9.aes(
+            x='colonne', 
+            y='value', 
+            xend='colonne', 
+            yend=descr_df_long.filter(pl.col('statistic') == '75%')['value']
+            ),
+            color="black"
+    ) + 
+    p9.geom_point(
+        descr_df_long.filter(pl.col('statistic') == '25%'),
+        p9.aes(x='colonne', y='value')
+    ) + 
+    p9.geom_point(
+        descr_df_long.filter(pl.col('statistic') == 'median/mode'),
+        p9.aes(x='colonne', y='value')
+    ) + 
+    p9.geom_point(
+        descr_df_long.filter(pl.col('statistic') == '75%'),
+        p9.aes(x='colonne', y='value')
+    ) + 
+    p9.geom_point(
+        descr_df_long.filter(pl.col('statistic') == '95%'),
+        p9.aes(x='colonne', y='value')
+    ) + 
+    p9.geom_point(
+        descr_df_long.filter(pl.col('statistic') == '99%'),
+        p9.aes(x='colonne', y='value')
+    ) +
+    p9.coord_flip() +
+    p9.theme_matplotlib()
+)
 
 
 # %%
