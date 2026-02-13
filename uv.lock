@@ -708,6 +708,7 @@ dependencies = [
     { name = "polars" },
     { name = "pyarrow" },
     { name = "scikit-learn" },
+    { name = "seaborn" },
     { name = "tabulate" },
 ]
 
@@ -725,6 +726,7 @@ requires-dist = [
     { name = "polars", specifier = ">=1.37.1" },
     { name = "pyarrow", specifier = ">=23.0.0" },
     { name = "scikit-learn", specifier = ">=1.8.0" },
+    { name = "seaborn", specifier = ">=0.13.2" },
     { name = "tabulate", specifier = ">=0.9.0" },
 ]
 
@@ -751,7 +753,6 @@ wheels = [
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp312-cp312-macosx_11_0_universal2.whl", hash = "sha256:7e806ca53acf6d15a888405880766ec84721aa4181261cd11a457dfe9a7a4975" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp312-cp312-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:d842c94b9155f1c9b3058036c24ffb8ff78b428414a19792b2380be9cecf4f36" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp312-cp312-manylinux_2_24_ppc64le.manylinux_2_28_ppc64le.whl", hash = "sha256:20fedaadd422fa02695f82093f9a98bad3dab5fcda793c658b945fcde2ab27ba" },
-    { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp312-cp312-manylinux_2_24_s390x.manylinux_2_28_s390x.whl", hash = "sha256:c620051669fd04ac6b60ebc70478210119c56e2d5d5df848baec4312e260e4ca" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:14194f5f4305800ff329cbf02c5fcc88f01886cadd29941b807668a45f0d2336" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:7b2fe4150a0cf59f847a67db8c155ac36aed89080a6a639e9f16df5d6c6096f1" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:49f4ad195d45f4a66a0eb9c1ba4832bb380570d361912fa3554746830d332149" },
@@ -760,7 +761,6 @@ wheels = [
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp313-cp313-macosx_11_0_universal2.whl", hash = "sha256:7ab327905cabb0622adca5971e488064e35115430cec2c35a50fd36e72a315b3" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp313-cp313-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:65be2f026ca6a176f88fb935ee23c18333ccea97048076aef4db1ef5bc0713ac" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp313-cp313-manylinux_2_24_ppc64le.manylinux_2_28_ppc64le.whl", hash = "sha256:7a3ae05b3d225b4155bda56b072ceb09d05e974bc74be6c3fc15463cf69f33fd" },
-    { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp313-cp313-manylinux_2_24_s390x.manylinux_2_28_s390x.whl", hash = "sha256:12184c61e5d64268a160226fb4818af4df02cfead8379d7f8b99a56c3a54ff3e" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:6423481193bbbe871313de5fd06a082f2649e7ce6e08015d2a76c1e9186ca5b3" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:33a956fe78bbbda82bfc95e128d61129b32d66bcf0a20a1f0c08aa4839ffa951" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:4b065d3284be43728dd280f6f9a13990b56470b81be20375a207cdc814a983f2" },
@@ -769,7 +769,6 @@ wheels = [
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp314-cp314-macosx_11_0_universal2.whl", hash = "sha256:bd59acd8529b372775cd0fcbc5f420ae20681c5b045ce25bd453ed8455ab99b5" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp314-cp314-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:b31c05dd84ef6871dd47120386aed35323c944d86c3d91a17c4b8d23df62f15b" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp314-cp314-manylinux_2_24_ppc64le.manylinux_2_28_ppc64le.whl", hash = "sha256:02925a0bfffc41e542c70aa14c7eda3593e4d7e274bfcccca1827e6c0875902e" },
-    { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp314-cp314-manylinux_2_24_s390x.manylinux_2_28_s390x.whl", hash = "sha256:3e0f3878ca3a3ff63ab4ea478585942b53df66ddde327b59ecb191b19dbbd62d" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp314-cp314-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:34a729e2e4e4ffe9ae2408d5ecaf12f944853f40ad724929b7585bca808a9d6f" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp314-cp314-musllinux_1_2_aarch64.whl", hash = "sha256:aec9ab04e82918e623415947921dea15851b152b822661cce3f8e4393c3df683" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:71c767cf281a80d02b6c1bdc41c9468e1f5a494fb11bc8688c360524e273d7b1" },
@@ -778,7 +777,6 @@ wheels = [
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp314-cp314t-macosx_11_0_universal2.whl", hash = "sha256:3e63252943c921b90abb035ebe9de832c436401d9c45f262d80e2d06cc659242" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp314-cp314t-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:76e39058e68eb125de10c92524573924e827927df5d3891fbc97bd55764a8774" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp314-cp314t-manylinux_2_24_ppc64le.manylinux_2_28_ppc64le.whl", hash = "sha256:c9f9d5e7a9310b7a2f416dd13d2e3fd8b42d803968ea580b7c0f322ccb389b97" },
-    { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp314-cp314t-manylinux_2_24_s390x.manylinux_2_28_s390x.whl", hash = "sha256:4b9721549a95db96689458a1e0ae32412ca18776ed004463df3a9299c1b257ab" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp314-cp314t-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:92497c78adf3ac703b57f1e3813c2d874f27f71a178f9ea5887855da413cd6d2" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp314-cp314t-musllinux_1_2_aarch64.whl", hash = "sha256:ed6b402bc74d6557a705e197d47f9063733091ed6357b3de33619d8a8d93ac53" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/greenlet/3.3.1/greenlet-3.3.1-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:59913f1e5ada20fde795ba906916aea25d442abcc0593fba7e26c92b7ad76249" },
@@ -2523,6 +2521,20 @@ wheels = [
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/scipy/1.17.0/scipy-1.17.0-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:f9eb55bb97d00f8b7ab95cb64f873eb0bf54d9446264d9f3609130381233483f" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/scipy/1.17.0/scipy-1.17.0-cp314-cp314t-win_amd64.whl", hash = "sha256:1ff269abf702f6c7e67a4b7aad981d42871a11b9dd83c58d2d2ea624efbd1088" },
     { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/scipy/1.17.0/scipy-1.17.0-cp314-cp314t-win_arm64.whl", hash = "sha256:031121914e295d9791319a1875444d55079885bbae5bdc9c5e0f2ee5f09d34ff" },
+]
+
+[[package]]
+name = "seaborn"
+version = "0.13.2"
+source = { registry = "https://nexus.insee.fr/repository/pypi-proxy/simple" }
+dependencies = [
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "pandas" },
+]
+sdist = { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/seaborn/0.13.2/seaborn-0.13.2.tar.gz", hash = "sha256:93e60a40988f4d65e9f4885df477e2fdaff6b73a9ded434c1ab356dd57eefff7" }
+wheels = [
+    { url = "https://nexus.insee.fr/repository/pypi-proxy/packages/seaborn/0.13.2/seaborn-0.13.2-py3-none-any.whl", hash = "sha256:636f8336facf092165e27924f223d3c62ca560b1f2bb5dff7ab7fad265361987" },
 ]
 
 [[package]]
