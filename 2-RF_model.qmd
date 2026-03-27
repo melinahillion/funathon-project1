@@ -22,7 +22,7 @@ So, RF rely on four key elements : building **aggregated regression or classific
 **You need to select several hyperparameters for training** (we cover the most important ones here) :
 
 - **Number of trees** : this hyperparameter must be tuned - too few trees lead to higher prediction error, while too many trees increase computational time;
-- **Number of randomly sampled candidate features** : use `sqrt` or `log2` to ensure true RF behavior;
+- **Number of randomly sampled candidate features** : use `sqrt` or `log2` to ensure the RF algorithm works well;
 - **Data sample rate** : useful to speed up training on large dataset, otherwise keep it close to `1.0`;
 - **Minimum number of observation per leaf** (terminal node) : setting a higher value can reduce training time, generally without any performance loss.
 
@@ -31,7 +31,7 @@ For more information, you can read the paragraph on RF hyperparameters [here](ht
 ::: {.callout-tip collapse="false" icon="false"}
 ## <i class="bi bi-book"></i> Exercice 4: Train your first Random Forest model
 
-1.  Using the `RandomForestRegressor` class and its [scikit-learn documentation page](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html), train a basic model with the following hyperparameters :
+1.  Using the `RandomForestRegressor` class and its [scikit-learn documentation page](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html), define a basic model with the following hyperparameters :
 
     -   n_estimators=50
 
@@ -39,11 +39,15 @@ For more information, you can read the paragraph on RF hyperparameters [here](ht
 
     -   min_samples_leaf=10
 
+Update the preprocessing pipeline with this new model. 
+
+Train the model (it should take about 10 minutes to train). 
+
         <details>
 
         <summary>Click to view a hint</summary>
 
-        Remember : in the Preprocessing section, we created the training sets `X_train` and `y_train`
+        Remember : in the [Preprocessing section](1-preprocessing.qmd), we created the training sets `X_train` and `y_train` and the `model` and `rf_pipeline`.
 
         </details>
 
@@ -60,15 +64,70 @@ from sklearn.ensemble import RandomForestRegressor
 rf = RandomForestRegressor(
     n_estimators=50,
     max_features="sqrt",
-    min_sample_leaf=10,
-    oob_error=True # for calculating total oob error for the RF
+    min_samples_leaf=10,
+    oob_score=True # for calculating total oob error for the RF
+)
+
+# Update the pipeline 
+rf_pipeline = Pipeline([
+    ('preprocessing', preprocessor),
+    ('random_forests', rf)
+])
+
+model = TransformedTargetRegressor(
+    regressor=rf_pipeline,
+    transformer=y_transformer
 )
 
 # Train the model with train set
-rf.fit(X_train, y_train)
+model.fit(X_train, y_train)
 ```
 
-2.  Print the `Out-of-Bag` error *(The concept of OOB error will be covered in the next exercise.)*
+2.  Print the `Out-of-Bag` error *(the concept of OOB error will be covered in the next exercise)*.
+
+
+::: {.callout-tip}
+Scikit-learn allows you to access every step of the pipeline with `model`'s attributes. For example, to access the transformer you would type `model.transformer` and to access the regressor you would type `model.regressor`. 
+
+
+```python
+model.regressor   # allows to access the unfitted pipeline defined with rf_pipeline
+```
+
+To access one of the two steps defined in the rf_pipeline (preprocessing or random_forests), they are stored in the dictionnary `model.regressor`. 
+
+```python
+model.regressor["preprocessing"]   # access to the first step
+model.regressor["random_forests"]   # access to the second step
+```
+
+:::
+
+::: {.callout-important}
+Scikit-learn  distinguishes **parameters** from **fitted attributes**. Here, when we define the `model` step : 
+
+- `regressor` is the parameter we pass **before** fitting. It's the estimator we configure.
+- `regressor_` is the attribute set **after** calling `.fit()`. It's a clone of `regressor` that has been actually trained on data.
+
+The `_` suffix is a consistent scikit-learn convention: any attribute that only exists after fitting ends with `_` (e.g., `coef_`, `n_features_in_`, `classes_`). It signals "this was learned from data."
+
+```python
+model.regressor_  # allows you to access the fitted clone of rf_pipeline (after model.fit())
+```
+
+To access the attributes sent back by the training phase listed in the documentation, you therefore need to call 
+
+```python
+# This would fail — the original rf_pipeline is unfitted
+model.regressor['random_forests'].oob_score_  # AttributeError
+
+# Access the fitted RF (has .feature_importances_, .oob_score_, etc.)
+fitted_rf = model.regressor_['random_forests']
+
+```
+
+:::
+
 
 ```{python}
 #| code-fold: true
@@ -76,12 +135,13 @@ rf.fit(X_train, y_train)
 #| code-overflow: scroll
 #| eval: false
 
-rf.oob_error
+model.regressor_['random_forests'].oob_score_
 ```
 
-2.  Now, calculate the accuracy of the model on the test set - that is, how far off the prediction are from the actual values
 
-    > Note : This is just an illustration of the evaluation process. More details on metrics will be covered in the next section.
+2.  Now, calculate the accuracy of the model on the test set - that is, how far off the prediction are from the actual values.
+
+    > Note : This is just an illustration of the evaluation process. More details on metrics will be covered in the [dedicated section](3-metrics.qmd).
 
     <details>
 
@@ -101,7 +161,7 @@ rf.oob_error
 from sklearn.metrics import mean_squared_error
 
 # Predictions on train set
-y_pred = rf.predict(X_test)
+y_pred = model.predict(X_test)
 
 # Print the error
 print(mean_squared_error(y_test, y_pred))
@@ -122,15 +182,15 @@ One easy way to determine the optimal number of trees is to use the *Out-of-Bag*
 
 With the scikit-learn's default implementation, producing this plot is not straightforward : the training process is optimised for speed, and trees are grown in parallel, meaning intermediate OOB estimates are not natively exposed. We therefore need to write a custom function to compute and plot this convergence curve. You can see the documentation page on OOB error [here](https://scikit-learn.org/stable/auto_examples/ensemble/plot_ensemble_oob.html)
 
-We will implement a function to plot the OOB error as a function of the number of trees in a RF model. To do so, you will need to :
+We will implement a function to plot the OOB error as a function of the number of trees in a RF model. To do so, you will need to:
 
--   subsample a fraction of the dataset to reduce computation time (the dataset is large with more than 1 million of rows)
+-   subsample a fraction of the dataset to reduce computation time (the dataset is large with more than 1 million of rows);
 
--   train multiple RF models with varying numbers of trees
+-   train multiple RF models with varying numbers of trees;
 
--   plot the OOB error for each RF model to visualize the convergence
+-   plot the OOB error for each RF model to visualize the convergence.
 
-1.  Subsample a fraction ( `0.1` ) of the dataset to reduce computation time
+1.  Subsample a fraction ( `0.1` ) of the dataset to reduce computation time.
 
 ```{python}
 #| code-fold: true
