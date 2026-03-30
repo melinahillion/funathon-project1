@@ -7,17 +7,15 @@ format:
     number-sections: true
 ---
 
-In this section, we will prepare the data to be used for training our machine learning model. 
-Pre-processing involves a lot of steps and many go between the models, the data and the pre-processing. 
-It also involves to have a very close look at the data to understand it before feeding it into a model. 
-It is therefore quite normal for **pre-processing to take time**. 
+In this section, we will prepare the data to be used for training our machine learning model. Pre-processing involves a lot of steps and many go between the models, the data and the pre-processing. It also involves to have a very close look at the data to understand it before feeding it into a model. It is therefore quite normal for **pre-processing to take time**.
 
-Pre-processing is built on `pandas` and on scikit-learn's pipeline structures.
-If you want more information, don't hesitate to go to [pandas documentation](https://pandas.pydata.org/pandas-docs/stable/reference/index.html) and follow one of the very good online [MOOC made by scikit-learn](https://inria.github.io/scikit-learn-mooc/) to understand the package and its way of working.  
+Pre-processing is built on `pandas` and on scikit-learn's pipeline structures. If you want more information, don't hesitate to go to [pandas documentation](https://pandas.pydata.org/pandas-docs/stable/reference/index.html) and follow one of the very good online [MOOC made by scikit-learn](https://inria.github.io/scikit-learn-mooc/) to understand the package and its way of working.
 
-To have a better understanding of what we will do, here is an overview of the pre-processing steps we will introduce in this part. 
+To have a better understanding of what we will do, here is an overview of the pre-processing steps we will introduce in this part.
 
 ![Overview of the pre-processing](pre-processing.png)
+
+# 1 - What are data inputs ?
 
 ::: {.callout-note appearance="simple"}
 ## Watch out
@@ -74,7 +72,7 @@ The aim of this part is to manipulate new database and understand features in or
     )
     ```
 
-2.  **Load, with DuckDB, all data inputs in a DataFrame `trans`**(for transactions).**
+2.  **Load, with DuckDB, all data inputs in a DataFrame `trans`**(for transactions).\*\*
 
 ```{python}
 #| code-fold: true
@@ -94,7 +92,7 @@ trans = con.sql(
 ::: {.callout-note title="Another way to load the data"}
 DuckDB is not the only tool you can use to read from the data. You can also use pandas' built-in `read_parquet` function for example.
 
-```{.python}
+``` python
 #| code-fold: true
 #| code-overflow: scroll
 import pandas as pd
@@ -106,7 +104,6 @@ trans = pd.concat(
         pd.read_parquet('s3://confpns/synthetic-transactions/rawdata/transactions/transactions_flats_final.parquet')
     ]
     )
-
 ```
 :::
 
@@ -114,7 +111,7 @@ trans = pd.concat(
 
     It is important to know the quality of your data and the definition of the columns when you train a ML model *(missings values, types of columns for exemple).* Details about the dataset, including a dictionnary of variables, is available [here](index.qmd).
 
-```{.python}
+``` python
 #| code-fold: true
 #| code-summary: See the solution
 #| code-overflow: scroll
@@ -137,7 +134,7 @@ df.notnull().all() # column with no NaN?
 
 <summary>View a hint</summary>
 
-You need to filter with the feature `ccodep`, with the following department codes for Paris area : ["75", "77", "78", "91", "92", "93", "94", "95"]
+You need to filter with the feature `ccodep`, with the following department codes for Paris area : \["75", "77", "78", "91", "92", "93", "94", "95"\]
 
 </details>
 
@@ -150,6 +147,8 @@ import pandas as pd
 trans = trans[trans["ccodep"].isin(["75", "77", "78", "91", "92", "93", "94", "95"])]
 ```
 ::::
+
+# 2 - Which transformations must you apply to the data ?
 
 ::: {.callout-tip collapse="false" icon="false"}
 ## <i class="bi bi-book"></i> Exercice 2: Analyzing data inputs
@@ -256,22 +255,20 @@ plt.tight_layout()
 plt.show()
 ```
 
-```         
 By looking at the graph, we see that the left tail gets bigger the closer we are to price going to 0.
-It may indicate an issue with data around these points.  
-By looking at this phenomena closer, we can see that a threshold of €100, €200 or €300 would filter out these issues. 
+It may indicate an issue with data around these points.
+By looking at this phenomena closer, we can see that a threshold of €100, €200 or €300 would filter out these issues.
 
-The second step is to apply some statistic methods. 
-For example, we can use the **Interquartile Range (IQR)*** *to remove outlier target values*.
+The second step is to apply some statistic methods.
+For example, we can use the \*\*Interquartile Range (IQR)\*\*\* \*to remove outlier target values\*.
 
-<details>
+\<details\>
 
-<summary>Click to view a hint</summary>
+\<summary\>Click to view a hint\</summary\>
 
-**Interquartile Range** method can keep all observations with target value between `Q1-1.5*(Q9-Q1)` and `Q9+1.5*(Q9-Q1)` .
+\*\*Interquartile Range\*\* method can keep all observations with target value between \`Q1-1.5\*(Q9-Q1)\` and \`Q9+1.5\*(Q9-Q1)\` .
 
-</details>
-```
+\</details\>
 
 ```{python}
 #| code-fold: true
@@ -312,16 +309,16 @@ print(f"{n1} rows after deterministic and statistic filtering")
 
 ```
 
-Applying these filters methods has dropped about `{python} f'{(n0 - n1)/n0}:.2f'` % of the transactions.
+```{python}
+#| include: false
+print(f'Applying these filters methods has dropped about {(n0 - n1)/n0}:.2f % of the transactions.')
+```
 
 4.  **Handle missing values in the target variable**
 
-The target variable should not contain missing values when using machine learning algorithms. 
-They should therefore be either dropped or imputed if you have reliable information to support the imputation.
+The target variable should not contain missing values when using machine learning algorithms. They should therefore be either dropped or imputed if you have reliable information to support the imputation.
 
-For our project, we will delete all observations with a missing target value. 
-You can see [pandas documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.dropna.html#pandas.DataFrame.dropna) for help. 
-
+For our project, we will delete all observations with a missing target value. You can see [pandas documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.dropna.html#pandas.DataFrame.dropna) for help.
 
 ```{python}
 #| code-fold: true
@@ -335,7 +332,7 @@ trans = trans.dropna(subset = "valfonc_m2")
 
 Before transforming features, you have to keep in mind **two essential points when working with trees** :
 
--   **No need to normalize, standardize or remove extreme values from numerical features**. Any transformation done with *monotonic function* is therefore useless (like log or square function). But a new feature defined as the quotient of two features does add information to the dataset. 
+-   **No need to normalize, standardize or remove extreme values from numerical features**. Any transformation done with *monotonic function* is therefore useless (like log or square function). But a new feature defined as the quotient of two features does add information to the dataset.
 
 -   **No need to remove correlated features, gradient boosting and random forests are robust to multicollinearity.** However, you can remove them if you want to accelerate the training phase but it isn't an issue for this project.
 
@@ -343,18 +340,17 @@ Before transforming features, you have to keep in mind **two essential points wh
 
 This part is the most delicate and complex point when you use random forests and gradient boosting. Indeed, you need to **transform categorical features to use them** in the training phase.
 
-Three different encoding methods exist for categorical features : 
+Three different encoding methods exist for categorical features :
 
-- **one-hot encoding** : it transforms a categorical feature into a serie of binaries features, each representing one modality of the original feature. However, this method increases the dimensionality of the data : it requires more training time and memory. For example, it would create an indicator for each city code in the data to test whether the property is located in this city. At the French national level, this represents around 35.000 new variables ! Therefore, this method is not recommended for features with more than 10 modalities. 
-- **ordinal encoding** : transform each modality of categorical feature into a unique integer. This method is suitable for feature with ordered modalities (age, income). Therefore, it is not recommended for features with no natural ordering. 
-- **target encoding** (for *CatBoost* and *scikit-learn* algorithms): replace each modality of categorical feature with the mean of the target for this modality. Useful for categorical features with many modalities and with no natural ordering.
+-   **one-hot encoding** : it transforms a categorical feature into a serie of binaries features, each representing one modality of the original feature. However, this method increases the dimensionality of the data : it requires more training time and memory. For example, it would create an indicator for each city code in the data to test whether the property is located in this city. At the French national level, this represents around 35.000 new variables ! Therefore, this method is not recommended for features with more than 10 modalities.
+-   **ordinal encoding** : transform each modality of categorical feature into a unique integer. This method is suitable for feature with ordered modalities (age, income). Therefore, it is not recommended for features with no natural ordering.
+-   **target encoding** (for *CatBoost* and *scikit-learn* algorithms): replace each modality of categorical feature with the mean of the target for this modality. Useful for categorical features with many modalities and with no natural ordering.
 
-You can find more details on scikit-learn's [online documentation](https://inria.github.io/scikit-learn-mooc/python_scripts/03_categorical_pipeline.html). 
+You can find more details on scikit-learn's [online documentation](https://inria.github.io/scikit-learn-mooc/python_scripts/03_categorical_pipeline.html).
 
 You have also another method (not an encoding), namely the **native support for categorical feature**, used in gradient boosting : the aim is to find the best split of the modalities of a categorical feature into two subset. This method has several advantages: it reduces the number of splits, produces simpler trees and increase the computational efficiency of training.
 
-What is the list of variable that are categorical ? Which encoding should we use ?
-Do not write any code for now, we will do so later. 
+What is the list of variable that are categorical ? Which encoding should we use ? Do not write any code for now, we will do so later.
 
 ### Numerical features
 
@@ -364,16 +360,15 @@ Keep it in mind when you work on ensemble methods !
 
 ### Missing values
 
-Ensemble methods handle missing values natively, so pre-treatment is technically optional — but still advisable for safety. The key practical point is always to verify that missing values are actually coded as `NaN` (or whatever the implementation expects) and not disguised behind another modality, such as `0`, `-999`, or a string placeholder, otherwise the native support won't work as intended.
-Here, the number of missing value is minimal and focused on some variable. We will filter out these elements.
+Ensemble methods handle missing values natively, so pre-treatment is technically optional — but still advisable for safety. The key practical point is always to verify that missing values are actually coded as `NaN` (or whatever the implementation expects) and not disguised behind another modality, such as `0`, `-999`, or a string placeholder, otherwise the native support won't work as intended. Here, the number of missing value is minimal and focused on some variable. We will filter out these elements.
 
 ### Time features
 
-All datetime features must be preprocessed — you cannot use the `Timestamp` type as-is for training. In this project, we will handle these features as follows: 
+All datetime features must be preprocessed — you cannot use the `Timestamp` type as-is for training. In this project, we will handle these features as follows:
 
-- create a new feature to compute the elapsed time between a reference date and the transaction date, in order to capture the trend of transactions ;
-- keep months feature to capture the seasonality of transactions and convert it to numeric ;
-- keep years feature to capture years specifics patterns and convert it to numeric.
+-   create a new feature to compute the elapsed time between a reference date and the transaction date, in order to capture the trend of transactions ;
+-   keep months feature to capture the seasonality of transactions and convert it to numeric ;
+-   keep years feature to capture years specifics patterns and convert it to numeric.
 
 You will see in the section {#sec-scikit-learn-pipeline} how preprocessing can be performed with scikit-learn.
 
@@ -385,8 +380,7 @@ You will see in the section {#sec-scikit-learn-pipeline} how preprocessing can b
 
     <summary>Click to view a hint</summary>
 
-    We chose to drop the following variables : `idmutation` (meaningless), `idnatmut` (meaningless), `libnatmut` (always equal to the same value), `valeurfonc` (already taken care of with our target), `ccodep` (geographical information is comprised in geographical coordinates x and y), `depcom` (geographical information is comprised in geographical coordinates x and y), `distance_ltm` and `distance_ltm_corr` have no meaningful information in the Paris area, far from the sea. 
-
+    We chose to drop the following variables : `idmutation` (meaningless), `idnatmut` (meaningless), `libnatmut` (always equal to the same value), `valeurfonc` (already taken care of with our target), `ccodep` (geographical information is comprised in geographical coordinates x and y), `depcom` (geographical information is comprised in geographical coordinates x and y), `distance_ltm` and `distance_ltm_corr` have no meaningful information in the Paris area, far from the sea.
 
     </details>
 
@@ -402,8 +396,7 @@ df = trans.drop(columns=[
 
 ```
 
-2.  For convenience, filter the rows containing at least one missing value. 
-You can check pandas's `dropna` function on [their documentation](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.dropna.html#pandas.DataFrame.dropna). Check before filtering the number of rows concerned.  
+2.  For convenience, filter the rows containing at least one missing value. You can check pandas's `dropna` function on [their documentation](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.dropna.html#pandas.DataFrame.dropna). Check before filtering the number of rows concerned.
 
 ```{python}
 # Printing all rows containing at least one NA
@@ -413,9 +406,7 @@ df[df.isna().any(axis=1)]
 df = df.dropna()
 ```
 
-
-3.  For convenience, we want to update the modalities of the `dteloc` variable : `1` means it's a house and `2` it's a flat. 
-You can check pandas's Categorical function on [their documentation](https://pandas.pydata.org/docs/reference/api/pandas.Categorical.html#pandas.Categorical). 
+3.  For convenience, we want to update the modalities of the `dteloc` variable : `1` means it's a house and `2` it's a flat. You can check pandas's Categorical function on [their documentation](https://pandas.pydata.org/docs/reference/api/pandas.Categorical.html#pandas.Categorical).
 
 ```{python}
 #| code-fold: true
@@ -429,8 +420,7 @@ df["dteloc"] = pd.Categorical(
 ).rename_categories({"1": "House", "2": "Flat"})
 ```
 
-
-4.  The codification of categorical variable can be computational intensive. `dteloc` has only two modalities but check the number of modalities of `jannath`. To speed-up the computation, can we regroup modalities together ?  How can we do it ? 
+4.  The codification of categorical variable can be computational intensive. `dteloc` has only two modalities but check the number of modalities of `jannath`. To speed-up the computation, can we regroup modalities together ? How can we do it ?
 
 ```{python}
 #| code-fold: true
@@ -452,14 +442,13 @@ df['jannath_10'] = df['jannath_10'].where(df['jannath_10'] >= 1850, 1840)
 df = df.drop(columns=["jannath"])
 ```
 
-
-5.  Split the dataframe in train and test set. 
+5.  Split the dataframe in train and test set.
 
     <details>
 
     <summary>Click to view a hint</summary>
 
-    you can use the function `train_test_split` from the module `sklearn.model_selection` and its [documentation](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html#sklearn.model_selection.train_test_split). 
+    you can use the function `train_test_split` from the module `sklearn.model_selection` and its [documentation](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html#sklearn.model_selection.train_test_split).
 
     </details>
 
@@ -484,9 +473,10 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 Now that you are familiar with the main mechanisms of pre-processing for model training, we will move on to using scikit-learn modules to prepare for training.
 
-Scikit-learn has a very well crafted documentation, so please do not hesitate to go and have a look on [their website](https://scikit-learn.org/stable/api/index.html). 
-
+Scikit-learn has a very well crafted documentation, so please do not hesitate to go and have a look on [their website](https://scikit-learn.org/stable/api/index.html).
 :::
+
+# 3 - How do you prepare your data with scikit-learn?
 
 ::: {.callout-tip collapse="false" icon="false"}
 ## <i class="bi bi-book"></i> Exercice 3: The scikit-learn pipeline
@@ -497,13 +487,13 @@ You are going to made your first scikit-learn pipeline. To begin, you can go to 
 
 You need to create a **pipeline**, *ie.* an single object to chain multiple processing steps. First, you put your pre-processing step - all transformation you need for the data preparation - and the model you have chosen at the end. Instead of applying each step manually one after the other, the pipeline does it automatically in the right order, both during training and prediction.
 
-For the pipeline, two constructors are available : 
+For the pipeline, two constructors are available :
 
-- `make_pipeline` is a convenience shortcut that automatically names each step after its lowercased class name. It is ideal for quick prototyping. You can see this constructor in the quickstart page above and have more info in [scikit-learn's documentation](https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.make_pipeline.html). 
+-   `make_pipeline` is a convenience shortcut that automatically names each step after its lowercased class name. It is ideal for quick prototyping. You can see this constructor in the quickstart page above and have more info in [scikit-learn's documentation](https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.make_pipeline.html).
 
 *Example :*
 
-```{.python}
+``` python
 from sklearn.pipeline import make_pipeline
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import OneHotEncoder
@@ -518,7 +508,7 @@ pipe = make_pipeline(
 
 *Example* :
 
-```{.python}
+``` python
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestRegressor
 
@@ -534,11 +524,11 @@ When you create a pipeline, the first step is to prepare your data. The object `
 
 However, **`ColumnTransformer` delete all features which are not named inside the object**.
 
-You can also check on scikit-learn documentation for the [`make_column_selector` function](https://scikit-learn.org/stable/modules/generated/sklearn.compose.make_column_selector.html). Instead of writing down all the categorical variables, you can use it to automatically detect categorical columns based on their data types.  
+You can also check on scikit-learn documentation for the [`make_column_selector` function](https://scikit-learn.org/stable/modules/generated/sklearn.compose.make_column_selector.html). Instead of writing down all the categorical variables, you can use it to automatically detect categorical columns based on their data types.
 
-Here is an example of scikit-learn functions used for preprocessing. We will adapt these for the current project afterwards. 
+Here is an example of scikit-learn functions used for preprocessing. We will adapt these for the current project afterwards.
 
-```{.python}
+``` python
 from sklearn.compose import ColumnTransformer, make_column_selector as selector
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.ensemble import RandomForestRegressor
@@ -563,9 +553,9 @@ pipeline = Pipeline([
 
 ## Now let's go : prepare the pipeline for the training
 
-We will now create our first pipeline to transform the data for the training phase. We will first use a Random Forest model and then compare with a gradient boosting model.  
+We will now create our first pipeline to transform the data for the training phase. We will first use a Random Forest model and then compare with a gradient boosting model.
 
-1.  Create the `ColumnTransformer` instance for the preprocessing step. Go and check [scikit-learn's documentation](https://scikit-learn.org/stable/modules/generated/sklearn.compose.ColumnTransformer.html). 
+1.  Create the `ColumnTransformer` instance for the preprocessing step. Go and check [scikit-learn's documentation](https://scikit-learn.org/stable/modules/generated/sklearn.compose.ColumnTransformer.html).
 
     <details>
 
@@ -573,7 +563,7 @@ We will now create our first pipeline to transform the data for the training pha
 
     For the preprocessing step, you have to :
 
-    -   transform the `datemut` variable, a `Timestamp` feature to a elapsed feature (`ref_date = '2010-01-01 00:00'`). You can create a new function `date_to_days`, and apply it with [scikit-learn's `FunctionTransformer`](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.FunctionTransformer.html). Note that the output of your `date_to_days` function should be a Python array and that `.to_numpy().reshape(-1, 1)` applied to a Pandas Series will transform it to the correct type ; 
+    -   transform the `datemut` variable, a `Timestamp` feature to a elapsed feature (`ref_date = '2010-01-01 00:00'`). You can create a new function `date_to_days`, and apply it with [scikit-learn's `FunctionTransformer`](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.FunctionTransformer.html). Note that the output of your `date_to_days` function should be a Python array and that `.to_numpy().reshape(-1, 1)` applied to a Pandas Series will transform it to the correct type ;
     -   apply the chosen encoding method (OneHotEncoder) on categorical features.
 
     </details>
@@ -673,7 +663,6 @@ model = TransformedTargetRegressor(
 )
 
 ```
-
 :::
 
 Congrats ! You have completed the data preparation exercises. Now you can choose one of the two model you'll want to train - or do both ! 💪
