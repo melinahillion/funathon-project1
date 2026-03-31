@@ -125,7 +125,7 @@ rf_params = {
     "max_features": "sqrt",
     "min_samples_split": 2,
     "min_samples_leaf": 10,
-    "random_state": 202605,
+    "random_state": RANDOM_STATE,
     "oob_score": True,
     "n_jobs": -1,  # The number of jobs to run in parallel, -1 using all processors
 }
