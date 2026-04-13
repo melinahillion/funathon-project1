@@ -98,26 +98,52 @@ Features with near-zero or negative permutation importance can safely be removed
 # 2 - Computing evaluation metrics
 
 ::: callout-tip
-## <i class="bi bi-book"></i> Exercice 8: Compute evaluation metrics
+## <i class="bi bi-book"></i> Exercice 10: Compute evaluation metrics
 
-In this exercise, you will generate predictions from the best RF model and compute all four evaluation metrics on the test set.
+In this exercise, you will generate predictions from the best RF and GB model and compute all four evaluation metrics on the test set.
 
-1.  Generate predictions on the test set using the best RF model from Exercise 5 and compute the residuals.
+0. Load the RF and GB models
 
 ```{python}
 #| code-fold: true
 #| code-summary: See the solution
 #| code-overflow: scroll
 #| eval: false
-y_pred = rf_best.predict(X_test)
-residuals = y_test - y_pred
+
+# best RF
+rf_model = rf_best
+
+# best GB
+gb_model = gb_model_final
+
 ```
 
-2.  Compute RMSE, MAE and R² using scikit-learn's metrics module.
+1.  Generate predictions on the test set using the best RF model from Exercise 5 and compute the residuals.
+
+
+```{python}
+#| code-fold: true
+#| code-summary: See the solution
+#| code-overflow: scroll
+#| eval: false
+
+# best RF
+y_pred_RF = rf_best.predict(X_test)
+RF_residuals = y_test - y_pred_RF
+
+# best GB
+y_pred_GB = gb_model_final.predict(X_test)
+GB_residuals = y_test - y_pred_GB
+
+```
+
+2.  Compute RMSE, MAE and R² using scikit-learn's metrics module for the comparison of RF and GB models.
 
 ::: {.callout-tip collapse="true" title="Click to view a hint"}
 
-Import `root_mean_squared_error`, `mean_absolute_error` and `r2_score` from `sklearn.metrics`. Build a dictionary of results and print each value with a descriptive label. You can see the documentation of `sklearn.metrics` [here](https://scikit-learn.org/stable/api/sklearn.metrics.html).
+Import `root_mean_squared_error`, `mean_absolute_error` and `r2_score` from `sklearn.metrics`. You can see the documentation of `sklearn.metrics` [here](https://scikit-learn.org/stable/api/sklearn.metrics.html).
+
+You can use the function `print-metrics` make in last section on *GB model*.
 
 :::
 
@@ -128,15 +154,24 @@ Import `root_mean_squared_error`, `mean_absolute_error` and `r2_score` from `skl
 #| eval: false
 from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
 
-metrics_rf = {
-    "RMSE": root_mean_squared_error(y_test, y_pred),
-    "MAE":  mean_absolute_error(y_test, y_pred),
-    "R²":   r2_score(y_test, y_pred),
-}
+def print_metrics(model, split, X=X_train, y=y_train):
+    """
+    Print metrics for trained model
+    """
+    y_pred = model.predict(X)
+    rmse = root_mean_squared_error(y, y_pred)
+    mae = mean_absolute_error(y, y_pred)
+    r2  = r2_score(y, y_pred)
+    print(f"{split} — RMSE: {rmse:.2f}  |  MAE: {mae:.2f}  |  R²: {r2:.4f}")
 
-for name, val in metrics_rf.items():
-    print(f"  {name}: {val:.4f}")
+models = [("RF", rf_model), ("GB", gb_model)]
+
+for name, model in models:
+    print_metrics(model, name, X_test, y_test)
+
 ```
+
+> Which model would you choose, and why?
 
 3.  (Optional) Compute the MAPE to express the average prediction error as a percentage of the actual price.
 
@@ -154,17 +189,19 @@ Use `mean_absolute_percentage_error` from `sklearn.metrics`. Make sure y_test co
 # Disponible à partir de scikit-learn >= 0.24
 from sklearn.metrics import mean_absolute_percentage_error
 
-mape_pct = mean_absolute_percentage_error(y_test, y_pred) * 100
-print(f"MAPE : {mape_pct:.2f} %")
+mape_pct_rf = mean_absolute_percentage_error(y_test, y_pred_RF) * 100
+mape_pct_gb = mean_absolute_percentage_error(y_test, y_pred_GB) * 100
+print(f"MAPE RF: {mape_pct_rf:.2f} %")
+print(f"MAPE GB: {mape_pct_gb:.2f} %")
 ```
 :::
 
 ::: callout-tip
-## <i class="bi bi-book"></i> Exercice 9: Generate diagnostic plots
+## <i class="bi bi-book"></i> Exercice 11: Generate diagnostic plots
 
 In this exercise, you will produce four diagnostic plots: a residuals distribution, a QQ-plot comparing actual and predicted quantiles, the target distribution and a feature importance plot. For each plot, take a moment to interpret what you observe.
 
-1.  Write a `residuals_distribution(residuals, rmse)` function to plot the histogram of the residuals, with the parameters `residuals` (a pandas Series) and `rmse` (a float). 
+1.  Write a `residuals_distribution(residuals, rmse)` function to plot the histogram of the residuals. It takes `residuals` (a pandas Series) and `rmse` (a float), along with `ax`, `label` and `color` parameters for overlay plotting. 
 
 ::: {.callout-tip collapse="true" title="Click to view a hint"}
 
@@ -179,18 +216,19 @@ Use `matplotlib.pyplot` module to plot the distribution. You can read the docume
 #| eval: false
 import matplotlib.pyplot as plt
 
-def residuals_distribution(residuals: pd.Series, rmse: float):
-    fig = plt.figure()
-    plt.hist(residuals, bins=100, edgecolor="none")
-    plt.axvline(0, color="red", linestyle="--", label="Residual = 0")
-    plt.xlabel("Residual")
-    plt.ylabel("Fréquency")
-    plt.title(f"Residuals distribution (RMSE = {rmse:.3f})")
-    plt.legend()
-    return fig
+def residuals_distribution(residuals: pd.Series, rmse: float, ax=None, label=None, color=None):
+    if ax is None:
+        fig, ax = plt.subplots()
+    ax.hist(residuals, bins=100, edgecolor="none", alpha=0.5, label=label or f"RMSE = {rmse:.3f}", color=color)
+    ax.axvline(0, color="red", linestyle="--")
+    ax.set_xlabel("Residual")
+    ax.set_ylabel("Frequency")
+    ax.set_title("Residuals distribution")
+    ax.legend()
+    return ax
 ```
 
-2.  Plot the residuals distribution. Look at whether the histogram is centered around zero and whether it is approximately symmetric.
+2.  Plot the residuals distribution of the RF and GB models. Look at whether the histogram is centered around zero and whether it is approximately symmetric.
 
 ::: {.callout-tip collapse="true" title="Click to view a hint"}
 
@@ -204,11 +242,13 @@ Pass the residuals series and the RMSE value computed in Exercise 8. The RMSE va
 #| code-overflow: scroll
 #| eval: false
 
-fig_residuals = residuals_distribution(residuals, metrics_rf["RMSE"])
+fig, ax = plt.subplots()
+residuals_distribution(RF_residuals, rmse_rf, ax=ax, label=f"RF (RMSE={rmse_rf:.3f})", color="steelblue")
+residuals_distribution(GB_residuals, rmse_gb, ax=ax, label=f"GB (RMSE={rmse_gb:.3f})", color="darkorange")
 plt.show()
 ```
 
-3.  Write a `QQplot(y_test, y_pred)` function which computes 1000 quantile points for both series and plots them against each other. The parameters are `y_test` and `y_pred`, pandas series of observed and predicted target. The function should return the plot. 
+3.  Write a `QQplot(y_test, y_pred)` function which computes 1000 quantile points for both series and plots them against each other. The parameters are `y_test`, `y_pred`, pandas series of observed and predicted target and the same parameters that question 1. for overlay plotting. The function should return the plot. 
 
 ```{python}
 #| code-fold: true
@@ -217,7 +257,7 @@ plt.show()
 #| eval: false
 import numpy as np
 
-def QQplot(y_test: pd.Series, y_pred: pd.Series):
+def QQplot(y_test: pd.Series, y_pred: pd.Series, ax=None, label=None, color=None):
     """
     Actual quantiles vs predicted quantiles
     """
@@ -225,22 +265,23 @@ def QQplot(y_test: pd.Series, y_pred: pd.Series):
     q_real = np.percentile(y_test, quantiles)
     q_predict = np.percentile(y_pred, quantiles)
 
-    fig = plt.figure()
-    plt.scatter(q_real, q_predict, alpha=0.5, s=5, label="Quantiles")
-    plt.plot(
+    if ax is None:
+        fig, ax = plt.subplots()
+    ax.scatter(q_real, q_predict, alpha=0.5, s=5, label=label or "Quantiles", color=color)
+    ax.plot(
         [q_real[0], q_real[-1]],
         [q_real[0], q_real[-1]],
-        "r--", linewidth=1.5, label="Actual = Predicted"
+        "r--", linewidth=1.5
     )
-    plt.xlabel("Actual quantiles")
-    plt.ylabel("Predicted quantiles")
-    plt.title("QQ-plot: actual vs predicted")
-    plt.legend()
-    return fig
+    ax.set_xlabel("Actual quantiles")
+    ax.set_ylabel("Predicted quantiles")
+    ax.set_title("QQ-plot: actual vs predicted")
+    ax.legend()
+    return ax
 
 ```
 
-4.  Plot the QQ plot comparing the quantiles of the actual and predicted distributions. Check whether the points align closely along the diagonal, especially in the tails.
+4.  Plot the QQ plot comparing the quantiles of the actual and predicted distributions for RF and GB models. Check whether the points align closely along the diagonal, especially in the tails.
 
 ::: {.callout-tip collapse="true" title="Click to view a hint"}
 
@@ -254,9 +295,13 @@ Points well above the diagonal in the upper tail indicate that the model underes
 #| code-overflow: scroll
 #| eval: false
 
-fig_qq = QQplot(y_test, y_pred)
+fig, ax = plt.subplots()
+QQplot(y_test, y_pred_RF, ax=ax, label="Random Forest", color="steelblue")
+QQplot(y_test, y_pred_GB, ax=ax, label="Gradient Boosting", color="darkorange")
 plt.show()
 ```
+
+> How does the gradient boosting model compare visually with the random forest?
 
 5. Define a `target_distribution()` function to plot the distribution of the parameter `y`, a pandas Serie.
 
@@ -297,8 +342,12 @@ fig_actual = target_distribution(y_test)
 plt.title("Target distribution — actual values")
 plt.show()
 
-fig_pred = target_distribution(y_pred)
-plt.title("Target distribution — predicted values")
+fig_pred = target_distribution(y_pred_RF)
+plt.title("Target distribution — predicted values with RF model")
+plt.show()
+
+fig_pred = target_distribution(y_pred_GB)
+plt.title("Target distribution — predicted values with GB model")
 plt.show()
 ```
 
@@ -307,36 +356,37 @@ plt.show()
 If you want to plot both plots on a single figure, you can adapt the function : 
 
 ```{python}
-def plot_combined_distribution(y_test: pd.Series, y_pred: pd.Series):
+def plot_combined_distribution(y_test: pd.Series, y_pred: pd.Series, ax=None, label=None, color=None, show_actual=True):
     """
     Plots the target distributions of actual and predicted values on the same graph.
-
-    Parameters:
-    y_test (pd.Series): Actual values.
-    y_pred (pd.Series): Predicted values.
     """
-    # Compute distributions
-    axe_actual, y_sorted_actual = np.linspace(0, 100, len(np.sort(y_test))), np.sort(y_test)
-    axe_pred, y_sorted_pred = np.linspace(0, 100, len(np.sort(y_pred))), np.sort(y_pred)
+    if ax is None:
+        fig, ax = plt.subplots()
 
-    # Create the plot
-    fig, ax = plt.subplots()
-    ax.plot(axe_actual, y_sorted_actual, label='Actual Values', color='blue')
-    ax.plot(axe_pred, y_sorted_pred, label='Predicted Values', color='red')
+    if show_actual:
+        y_sorted_actual = np.sort(y_test)
+        axe_actual = np.linspace(0, 100, len(y_sorted_actual))
+        ax.plot(axe_actual, y_sorted_actual, label="Actual Values", color="black")
 
-    # Customize the plot
+    y_sorted_pred = np.sort(y_pred)
+    axe_pred = np.linspace(0, 100, len(y_sorted_pred))
+    ax.plot(axe_pred, y_sorted_pred, label=label or "Predicted Values", color=color)
+
     ax.set_xlabel("Percentile")
     ax.set_ylabel("Price")
     ax.set_title("Target distribution — actual vs predicted values")
     ax.legend()
-    plt.show()
+    return ax
 
 
-plot_combined_distribution(y_test, y_pred)
+fig, ax = plt.subplots()
+plot_combined_distribution(y_test, y_pred_RF, ax=ax, label="Random Forest", color="steelblue", show_actual=True)
+plot_combined_distribution(y_test, y_pred_GB, ax=ax, label="Gradient Boosting", color="darkorange", show_actual=False)
+plt.show()
 ```
 :::
 
-7. Write a `calculate_importance(X_test, y_test, RANDOM_STATE, rf_best, SCORING)` function, which returns a sorted Series of importance scores with features name as index. The parameters are the test set (`X_test` and `y_test`), the RF model `rf_best` trained in last section and the scoring chosen for the impurity reduction.
+7. (Only for RF model) Write a `calculate_importance(X_test, y_test, RANDOM_STATE, rf_best, SCORING)` function, which returns a sorted Series of importance scores with features name as index. The parameters are the test set (`X_test` and `y_test`), the RF model `rf_best` trained in last section and the scoring chosen for the impurity reduction.
 
 > Note: Permutation importance is computationally expensive on a large test set. The `calculate_importance()` function automatically subsamples up to 100,000 observations before computing importance scores. This subsample does not change the result.
 
