@@ -24,12 +24,7 @@ The project is structured as a progressive, hands-on tutorial organized in five 
 ├── starting_point/          # Notebooks with exercises (to be completed)
 ├── intermediate_solutions/  # Step-by-step partial solutions
 ├── solution/                # Full reference solutions
-├── 1-preprocessing.qmd      # Part 1: Data preprocessing
-├── 2-GB_model.qmd           # Part 2: Gradient Boosting model
-├── 2-RF_model.qmd           # Part 2: Random Forest model
-├── 3-metrics.qmd            # Part 3: Model evaluation
-├── 4-logging.qmd            # Part 4: MLFlow experiment tracking
-├── 5-deployment.qmd         # Part 5: FastAPI deployment
+├── subject/                 # Quarto files for website
 ├── pyproject.toml           # Python dependencies (managed with uv)
 └── _quarto.yaml             # Quarto site configuration
 ```
