@@ -136,7 +136,8 @@ The project has the following structure :
 
 ![Project organization](../img/orga.png)
 
--   The subject, with .qmd files, are available in the `subject` folder;
+-   The subject, with `.qmd` files, are available in the `subject` folder;
+-   The `.qmd` files and the `_quarto.yaml` file are necessary to build the website;
 -   The file `pyproject.toml` describes the dependencies of the project (using uv);
 -   The starting point is available in the `starting_point` folder;
 -   Intermediate solutions to the exercices are available in the `intermediate_solutions` folder;
