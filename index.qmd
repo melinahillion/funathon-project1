@@ -1,0 +1,10 @@
+---
+pagetitle: "AIML4OS Funathon - Project 1"
+format:
+  html:
+    minimal: true
+---
+
+```{=html}
+<meta http-equiv="refresh" content="0; url=subject/introduction.html">
+```

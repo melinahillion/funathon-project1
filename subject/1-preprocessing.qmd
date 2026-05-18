@@ -99,7 +99,7 @@ trans = pd.read_parquet('s3://projet-funathon/2026/project1/data/1_input/transac
 
 3.  **Search some information about `trans` dataframe**
 
-    It is important to know the quality of your data and the definition of the columns when you train a ML model *(missings values, types of columns for exemple).* Details about the dataset, including a dictionnary of variables, is available [here](index.qmd).
+    It is important to know the quality of your data and the definition of the columns when you train a ML model *(missings values, types of columns for exemple).* Details about the dataset, including a dictionnary of variables, is available [here](introduction.qmd).
 
 ``` python
 #| code-fold: true
@@ -401,7 +401,7 @@ df["prop_type"] = pd.Categorical(
 ```
 
 
-4.  The codification of categorical variable can be computational intensive. `prop_type` has only two modalities but check the number of modalities of `prop_year_harm`. To speed-up the computation, can we regroup modalities together ?  Does it make sense given how the variable has been transformed (see the [presentation of the data](index.qmd)) ? How can we do it ?
+4.  The codification of categorical variable can be computational intensive. `prop_type` has only two modalities but check the number of modalities of `prop_year_harm`. To speed-up the computation, can we regroup modalities together ?  Does it make sense given how the variable has been transformed (see the [presentation of the data](introduction.qmd)) ? How can we do it ?
 
 ```{python}
 #| code-fold: true

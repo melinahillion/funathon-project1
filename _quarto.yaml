@@ -1,6 +1,7 @@
 project:
   type: website
   render:
+    - "index.qmd"
     - "subject/*.qmd"
 website:
   title: "AIML4OS Funathon - Project 1"
@@ -31,7 +32,7 @@ website:
       - text: "0. Introduction"
         menu: 
         - text: "Presentation"
-          href: subject/index.qmd
+          href: subject/introduction.qmd
         - text: "Data presentation"
           href: subject/intro_data.qmd
       - text: "1. Preprocessing"

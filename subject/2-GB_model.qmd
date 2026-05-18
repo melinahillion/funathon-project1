@@ -597,10 +597,12 @@ print("Final model trained.")
 ## Exercice 9: Evaluate the final Gradient Boosting model
 
 
-::: {.callout-tip title="If you're stuck - fetch back final GB model"}
+::: {.callout-important title="If you're stuck - fetch back final GB model"}
 
-If you're stuck, you can fetch back the final trained model by executing the following code.
-The fetched model can then be used to predict any values and evaluate it. 
+<div style="display:flex;align-items:center;gap:0.4em;margin-bottom:0.8em;">
+<img src="../img/CheckpointSM3DL.webp" style="max-height:4em;width:auto;flex-shrink:0;"/>
+<div style="flex:1;margin:0;">If you're stuck, you can fetch back the final trained model by executing the following code. The fetched model can then be used to predict any values and evaluate it.</div>
+</div>
 
 
 ```python
