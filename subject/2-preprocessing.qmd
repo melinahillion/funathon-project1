@@ -7,7 +7,7 @@ format:
     number-sections: true
 ---
 
-In this section, we will prepare the data to be used for training our machine learning model. Pre-processing involves a lot of steps and many go between the models, the data and the pre-processing. It also involves to have a very close look at the data to understand it before feeding it into a model. It is therefore quite normal for **pre-processing to take time**.
+In this section, we will prepare the data to be used for training our machine learning model. Pre-processing involves a lot of steps and many go between the models, the data and the pre-processing. It also requires to have a very close look at the data to understand it before feeding it into a model. So keep in mind: **pre-processing takes time**, but it is really useful to get high-quality models.
 
 Pre-processing is built on `pandas` and on scikit-learn's pipeline structures. If you want more information, don't hesitate to go to [pandas documentation](https://pandas.pydata.org/pandas-docs/stable/reference/index.html) and follow one of the very good online [MOOC made by scikit-learn](https://inria.github.io/scikit-learn-mooc/) to understand the package and its way of working.
 
@@ -30,11 +30,13 @@ You have to load the file `2026/project1/data/1_input/transactions_EN.parquet` f
 
 The aim of this part is to manipulate new database and understand features in order to prepare the preprocessing steps: it's an important step in ML pipeline.
 
-1.  **Initialiaze a DuckDB connection.**
+1.  **Initialize a DuckDB connection.**
+
+To do so, you need to import the `duckdb` library and then open an in-memory connection.
 
     ::: {.callout-tip collapse="true" title="Hint"}
 
-    First, you need to open a connection in the memory. Second, you need to create a secret table with S3 credentials
+    You can have a look at the [official `duckdb` documentation](https://duckdb.org/docs/current/clients/python/overview#using-an-in-memory-database).
 
     :::
 
@@ -48,24 +50,6 @@ The aim of this part is to manipulate new database and understand features in or
 
     # Create a non-persistent connection (the database exists only while the connection is alive and disappears when it is closed)
     con = duckdb.connect(database=":memory:")
-
-    # You need to create a secret table with all the S3 credentials
-    con.execute(
-        f"""
-        CREATE SECRET secret_s3 (
-        TYPE S3,
-        KEY_ID '{os.environ["AWS_ACCESS_KEY_ID"]}',
-        SECRET '{os.environ["AWS_SECRET_ACCESS_KEY"]}',
-        ENDPOINT '{os.environ["AWS_S3_ENDPOINT"]}',
-        SESSION_TOKEN '{os.environ["AWS_SESSION_TOKEN"]}',
-        REGION 'eu-west-1',
-        URL_STYLE 'path',
-        SCOPE 's3://projet-funathon/'
-        );
-        """
-    )
-
-    RANDOM_STATE = 202605
     ```
 
 2.  **Load, with DuckDB, all data inputs in a DataFrame `trans`** (for transactions).
