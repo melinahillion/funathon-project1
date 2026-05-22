@@ -40,17 +40,17 @@ You can have a look at the [official `duckdb` documentation](https://duckdb.org/
 
 :::
 
-    ```{python}
-    #| code-fold: true
-    #| code-summary: See the solution
-    #| code-overflow: scroll
+```{python}
+#| code-fold: true
+#| code-summary: See the solution
+#| code-overflow: scroll
 
-    import duckdb
-    import os
+import duckdb
+import os
 
-    # Create a non-persistent connection (the database exists only while the connection is alive and disappears when it is closed)
-    con = duckdb.connect(database=":memory:")
-    ```
+# Create a non-persistent connection (the database exists only while the connection is alive and disappears when it is closed)
+con = duckdb.connect(database=":memory:")
+```
 
 2.  **Load, with DuckDB, all data inputs in a DataFrame `trans`** (for transactions).
 
